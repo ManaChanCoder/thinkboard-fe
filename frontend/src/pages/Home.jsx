@@ -5,11 +5,7 @@ import RateLimit from "../components/RateLimit";
 import { noteStore } from "../store/noteStore";
 
 export default function Home() {
-  const { getNotes, deleteNoteById, notes, rateLimit, loading } = noteStore();
-
-  const handleDelete = async (id) => {
-    await deleteNoteById(id);
-  };
+  const { getNotes, notes, rateLimit, loading } = noteStore();
 
   useEffect(() => {
     getNotes();
@@ -28,12 +24,8 @@ export default function Home() {
               Loading...
             </p>
           ) : notes.length > 0 && !rateLimit ? (
-            notes.map((note) => (
-              <Card
-                key={note?._id}
-                note={note || {}}
-                onDelete={() => handleDelete(note?._id)}
-              />
+            notes.map((note, index) => (
+              <Card key={note?._id || index} note={note || {}} />
             ))
           ) : (
             <span className="text-center text-white block w-full col-span-full">

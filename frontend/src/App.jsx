@@ -8,7 +8,7 @@ const App = () => {
   const isDark = themeStore((state) => state.isDark);
   const themeClass = isDark ? "forest" : "light";
   return (
-    <div className="h-screen w-full" data-theme={themeClass}>
+    <div className="min-h-screen max-h-full w-full" data-theme={themeClass}>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/create" element={<Create />} />

@@ -24,6 +24,23 @@ export const noteStore = create((set) => ({
     }
   },
 
+  getNoteById: async (id) => {
+    set({ loading: true, message: "" });
+
+    try {
+      const res = await axios.get(`${API_URL}/api/notes/${id}`);
+
+      set({ notes: [res.data.getNoteByIdData], loading: false });
+    } catch (error) {
+      if (error.response?.status === 429) {
+        set({ rateLimit: true, loading: false });
+      } else {
+        set({ message: error.message, loading: false });
+      }
+      console.error(error);
+    }
+  },
+
   createNote: async (payload) => {
     set({ loading: true, message: "" });
 
@@ -59,9 +76,15 @@ export const noteStore = create((set) => ({
 
   updateNoteById: async (id, payload) => {
     set({ loading: true, message: "" });
+    const promise = axios.put(`${API_URL}/api/notes/${id}`, payload);
 
+    toast.promise(promise, {
+      loading: "Loading...",
+      success: (res) => res.data.message,
+      error: (err) => err.response?.data?.message || "Failed to create note",
+    });
     try {
-      const res = await axios.put(`${API_URL}/api/notes/${id}`, payload);
+      const res = await promise;
 
       const updatedNote = res.data.updateNoteData;
 
@@ -72,6 +95,7 @@ export const noteStore = create((set) => ({
         loading: false,
         message: res.data.message,
       }));
+      return true;
     } catch (error) {
       if (error.response?.status === 429) {
         set({ rateLimit: true, loading: false });

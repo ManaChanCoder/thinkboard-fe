@@ -3,8 +3,9 @@ import { noteStore } from "../store/noteStore";
 import { themeStore } from "../store/themeStore";
 
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-
+import { minText } from "../utils/formatter";
 export default function Create() {
   const isDark = themeStore((state) => state.isDark);
   const { createNote, loading } = noteStore();
@@ -26,6 +27,15 @@ export default function Create() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!minText(formInput.title, 10)) {
+      toast.error("Title must have at least 10 characters!");
+      return;
+    }
+    if (!minText(formInput.content, 30)) {
+      toast.error("Content must have at least 30 characters!");
+      return;
+    }
     const success = await createNote(formInput);
     if (success) {
       setFormInput({
@@ -52,7 +62,7 @@ export default function Create() {
       >
         <h1 className="text-xl mb-5">Create New Note</h1>
 
-        <form action="" className="leading-5">
+        <form action="" className="leading-5" onSubmit={handleSubmit}>
           <div className="mb-3 leading-8">
             <label htmlFor="">Title</label>
             <input
@@ -61,7 +71,7 @@ export default function Create() {
               value={formInput.title}
               onChange={handleChange}
               placeholder="Note title"
-              className={`w-full border bg-transparent rounded-md px-2 py-1 outline-none ring-2 ring-transparent border-gray-400 ${isDark ? "focus:ring-green-500" : "focus:ring-blue-50"}`}
+              className={`w-full border bg-transparent rounded-md px-2 py-1 outline-none ring-2 ring-transparent border-gray-400 ${isDark ? "focus:ring-green-500" : "focus:ring-blue-500"}`}
             />
           </div>
           <div className="leading-8 mb-5">
@@ -72,13 +82,19 @@ export default function Create() {
               id=""
               rows={4}
               onChange={handleChange}
-              placeholder="Note content"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit(e);
+                }
+              }}
+              placeholder="Note content [shift+enter to make new line]"
               className={`w-full border bg-transparent rounded-md px-2 py-1 outline-none ring-2 ring-transparent border-gray-400 ${isDark ? "focus:ring-green-500" : "focus:ring-blue-500"}`}
             ></textarea>
           </div>
           <div className="flex justify-end">
             <button
-              onClick={handleSubmit}
+              type="submit"
               className="btn btn-success"
               disabled={loading}
             >
